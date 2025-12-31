@@ -105,7 +105,7 @@ BEGIN
     where hd.Ma_kh = @Ma_kh
 END
 GO
--- tra cưu lịch khám
+-- tra cưu lịch khám, có trể truyền vào 1 trong 3 tham số.
 
 CREATE PROCEDURE TraCuuLichBacSi
     @Ho_Ten nvarchar(100) = NULL, -- Tham số tùy chọn
@@ -134,4 +134,65 @@ BEGIN
     ORDER BY lk.Ngay_Kham DESC, lk.Ca_lamviec ASC;
 END
 
-exec tracuulichbacsi
+GO
+
+-- đặt lịch khám.
+CREATE PROCEDURE sp_DatLichKham
+    @Ma_KH varchar(10),
+    @Ma_PET varchar(10),
+    @Ma_BS varchar(10),
+    @Ca_lamviec int,
+    @Ngay_Dat datetime
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        -- 1. Kiểm tra ngày đặt có hợp lệ không (không cho đặt ngày đã qua)
+        IF CAST(@Ngay_Dat AS DATE) < CAST(GETDATE() AS DATE)
+        BEGIN
+            RAISERROR(N'Không thể đặt lịch cho ngày trong quá khứ.', 16, 1);
+        END
+
+        -- 2. Kiểm tra xem Bác sĩ có lịch trực vào ngày/ca đó không
+        -- Giả sử bảng lịch làm việc của bạn tên là Lich_Kham
+        IF NOT EXISTS (
+            SELECT 1 FROM Lich_Kham 
+            WHERE Ma_BS = @Ma_BS 
+              AND CAST(Ngay_Kham AS DATE) = CAST(@Ngay_Dat AS DATE) 
+              AND Ca_lamviec = @Ca_lamviec
+        )
+        BEGIN
+            RAISERROR(N'Bác sĩ không có lịch trực vào ca này.', 16, 1);
+        END
+
+        -- 3. Kiểm tra xem ca này bác sĩ đã có ai đặt chưa (Trạng thái khác 'Đã hủy')
+        IF EXISTS (
+            SELECT 1 FROM Phieu_Dat_Lich_Kham
+            WHERE Ma_BS = @Ma_BS 
+              AND CAST(Ngay_Dat AS DATE) = CAST(@Ngay_Dat AS DATE) 
+              AND Ca_lamviec = @Ca_lamviec
+              AND Trang_Thai <> N'Đã hủy'
+        )
+        BEGIN
+            RAISERROR(N'Bác sĩ đã có lịch hẹn khác vào khung giờ này.', 16, 1);
+        END
+
+        -- 4. Nếu mọi thứ ổn, tiến hành Insert
+        INSERT INTO Phieu_Dat_Lich_Kham (Ma_KH, Ma_PET, Ma_BS, Ca_lamviec, Ngay_Dat, Trang_Thai)
+        VALUES (@Ma_KH, @Ma_PET, @Ma_BS, @Ca_lamviec, @Ngay_Dat, N'Chưa xác nhận');
+
+        -- Trả về ID vừa tạo để Backend xử lý
+        SELECT SCOPE_IDENTITY() AS Ma_Phieu_Moi, 'Success' AS Status;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+        
+        -- Trả về lỗi cho Backend
+        SELECT 'Error' AS Status, ERROR_MESSAGE() AS Message;
+    END CATCH
+END
