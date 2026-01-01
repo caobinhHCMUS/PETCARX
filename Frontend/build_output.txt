@@ -1,0 +1,5 @@
+
+> petcarx-frontend@0.0.0 build
+> tsc -b && vite build
+
+src/components/ui/Button.tsx(2,10): error TS1484: 'ButtonHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.

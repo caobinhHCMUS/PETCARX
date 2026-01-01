@@ -1,0 +1,261 @@
+﻿USE [PetCareX]
+GO
+
+
+
+
+CREATE TABLE [dbo].[CHI_NHANH](
+	[Ma_CN] [varchar](10) NOT NULL,
+	[Ten_CN] [nvarchar](100) NOT NULL,
+	[Dia_Chi] [nvarchar](255) NULL,
+	[SDT] [varchar](15) NULL,
+	[Gio_MoCua] [time](7) NULL,
+	[Gio_DongCua] [time](7) NULL,
+	[NguoiQuanLy] [varchar](10) NULL,
+) 
+GO
+
+
+CREATE TABLE [dbo].[CT_BAC_SI](
+	ho_ten nvarchar(100) NOT NULL,
+	[Ma_NV] [varchar](10) NOT NULL,
+	[So_Nam_Kinh_Nghiem] [int] NULL,
+	[Bang_Cap] [nvarchar](100) NULL,
+)
+GO
+
+
+
+GO
+CREATE TABLE [dbo].[CT_KHAM_BENH](
+	[Ma_HD] [varchar](10) NOT NULL,
+	[Ma_PET] [varchar](10) NOT NULL,
+	[Ngay_Kham] [datetime] NOT NULL,
+	[Trieu_Chung] [nvarchar](max) NULL,
+	[Chuan_Doan] [nvarchar](max) NULL,
+	[Ngay_Hen_Tai_Kham] [datetime] NULL,
+	[Bac_Si] [varchar](10) NULL,
+	[Thanh_Tien] [decimal](18, 2) NULL,
+
+)
+
+GO
+
+CREATE TABLE [dbo].[CT_MUA_HANG](
+	[Ma_HD] [varchar](10) NOT NULL,
+	[Ma_SP] [varchar](10) NOT NULL,
+	[So_Luong] [int] NULL,
+	[Thanh_Tien] [decimal](18, 2) NULL,
+
+)
+
+GO
+CREATE TABLE [dbo].[CT_TIEM_GOI](
+	[Ma_HD] [varchar](10) NOT NULL,
+	[Ma_PET] [varchar](10) NOT NULL,
+	[Ma_GT] [varchar](10) NOT NULL,
+	[Ma_Vacxin] [varchar](10) NOT NULL,
+	[Ngay_Hen_Tiem] [datetime] NULL,
+	[Ngay_Tiem_Thuc_Te] [datetime] NULL,
+	so_mui_tiem_con_lai int
+) 
+GO
+
+CREATE TABLE [dbo].[CT_TIEM_LE](
+	[Ma_HD] [varchar](10) NOT NULL,
+	[Ma_PET] [varchar](10) NOT NULL,
+	[Ma_Vacxin] [varchar](10) NOT NULL,
+	[Ngay_Tiem] [datetime] NULL,
+	[Lieu_Luong] [nvarchar](50) NULL,
+	[Thanh_Tien] [decimal](18, 2) NULL,
+
+)
+
+GO
+CREATE TABLE [dbo].[GOI_TIEM](
+	[Ma_GT] [varchar](10) NOT NULL,
+	[Ten_GT] [nvarchar](100) NULL,
+	[Thoi_Gian] [nvarchar](20) NULL,
+	[Gia] [decimal](18, 2) NULL,
+
+) 
+GO
+
+CREATE TABLE [dbo].[HOA_DON](
+	[Ma_HD] [varchar](10) NOT NULL,
+	[NV_Lap] [varchar](10) NULL,
+	[Ma_KH] [varchar](10) NULL,
+	[Ngay_Lap] [datetime] NULL,
+	[HinhThuc_TT] [nvarchar](50) NULL,
+	[Khuyen_Mai] [int] NULL,
+	[Tong_Tien] [decimal](18, 2) NULL,
+
+)
+GO
+
+CREATE TABLE [dbo].[KHACH_HANG](
+	[Ma_KH] [varchar](10) NOT NULL,
+	[CCCD] [varchar](12) NULL,
+	[Ho_Ten] [nvarchar](100) NULL,
+	[Ngay_Sinh] [date] NULL,
+	[Gioi_Tinh] [nvarchar](10) NULL,
+	[Email] [varchar](100) NULL,
+	[SDT] [varchar](15) NULL,
+	[Tong_Chi_Tieu] [decimal](18, 2) NULL,
+	[Cap_Do_Hoi_Vien] [nvarchar](20) NULL,
+	[Diem_Loyalty] [int] NULL,
+
+)
+GO
+
+CREATE TABLE [dbo].[LICH_SU_DIEU_DONG](
+	[Ma_NV] [varchar](10) NOT NULL,
+	[From_CN] [varchar](10) NULL,
+	[To_CN] [varchar](10) NULL,
+	[Ngay_Chuyen] [date] NOT NULL,
+
+) 
+GO
+
+CREATE TABLE [dbo].[NHAN_VIEN](
+	[Ma_NV] [varchar](10) NOT NULL,
+	[Ho_Ten] [nvarchar](100) NOT NULL,
+	[Ngay_Sinh] [date] NULL,
+	[Gioi_Tinh] [nvarchar](10) NULL,
+	[Vai_Tro] [nvarchar](50) NULL,
+	[Ngay_Vao] [date] NULL,
+	[Luong_CB] [decimal](18, 2) NULL,
+	[Ma_CN] [varchar](10) NULL,
+
+) 
+GO
+
+CREATE TABLE [dbo].[SAN_PHAM](
+	[Ma_SP] [varchar](10) NOT NULL,
+	[Ten_SP] [nvarchar](100) NULL,
+	[Loai_SP] [nvarchar](50) NULL,
+	[Gia] [decimal](18, 2) NULL,
+	[Don_Vi_Tinh] [nvarchar](20) NULL,
+	[So_Luong] [int] NULL,
+)
+GO
+
+CREATE TABLE [dbo].[TAI_KHOAN](
+	[Ten_DangNhap] [varchar](50) NOT NULL,
+	[Mat_Khau] [varchar](255) NOT NULL,
+	[Ma_KH] [varchar](10) NULL,
+
+)
+GO
+
+CREATE TABLE [dbo].[THU_CUNG](
+	[Ma_PET] [varchar](10) NOT NULL,
+	[Ma_KH] [varchar](10) NULL,
+	[Ten_PET] [nvarchar](50) NULL,
+	[Ten_Loai] [nvarchar](50) NULL,
+	[Giong] [nvarchar](50) NULL,
+	[Gioi_Tinh] [nvarchar](10) NULL,
+	[Ngay_Sinh] [date] NULL,
+	[Tinh_Trang_Suc_Khoe] [nvarchar](255) NULL,
+
+)
+GO
+
+CREATE TABLE [dbo].[VAC_XIN](
+	[Ma_Vacxin] [varchar](10) NOT NULL,
+	[Ten_Vacxin] [nvarchar](100) NULL,
+	[Gia] [decimal](18, 2) NULL,
+	[Xuat_Xu] [nvarchar](100) NULL,
+
+)
+
+GO
+CREATE TABLE DANGKY_GOITIEM(
+	MA_PET varchar(10),
+	ma_GT varchar(10),
+	PRIMARY KEY (MA_PET, MA_GT)
+)
+
+CREATE TABLE DANHGIA(
+	Ma_KH varchar(10),
+	ma_HD varchar(10),
+	Chat_luongdv nvarchar(100),
+	thai_do_nv nvarchar(150),
+	muc_do_hai_long nvarchar(100),
+	Binh_luan nvarchar(500),
+
+	PRIMARY KEY (MA_KH, MA_HD)
+)
+
+CREATE TABLE SOMUITIEM(
+	Ma_GT varchar(10),
+	Ma_Vacxin varchar(10),
+	SoMuiTiem int default 1,
+)
+GO
+
+create table Lich_Kham
+(
+	Ma_lich varchar(10) primary key,
+	Ma_BS varchar(10),
+	Ca_lamviec int check (Ca_lamviec in (1,2,3)),
+	Ngay_Kham datetime,
+	ghi_chu nvarchar(50),
+)
+go
+
+create table Phieu_Dat_Lich_Kham
+(
+	Ma_Phieu int identity(1,1) primary key,
+	Ma_KH varchar(10),
+	Ma_PET varchar(10),
+	Ma_BS varchar(10),
+	Ca_lamviec int check (Ca_lamviec in (1,2,3)),
+	Ngay_Dat datetime,
+	Trang_Thai nvarchar(50) check (Trang_Thai in (N'Đã xác nhận', N'Chưa xác nhận', N'Đã hủy', N'Hoàn thành')) default N'Chưa xác nhận',
+)
+
+go
+
+--
+ALTER TABLE [dbo].[CT_BAC_SI] ADD  DEFAULT ((0)) FOR [So_Nam_Kinh_Nghiem]
+GO
+ALTER TABLE [dbo].[HOA_DON] ADD  DEFAULT ((0)) FOR [Khuyen_Mai]
+GO
+ALTER TABLE [dbo].[HOA_DON] ADD  DEFAULT ((0)) FOR [Tong_Tien]
+GO
+ALTER TABLE [dbo].[KHACH_HANG] ADD  DEFAULT ((0)) FOR [Tong_Chi_Tieu]
+GO
+ALTER TABLE [dbo].[KHACH_HANG] ADD  DEFAULT (N'Cơ bản') FOR [Cap_Do_Hoi_Vien]
+GO
+ALTER TABLE [dbo].[KHACH_HANG] ADD  DEFAULT ((0)) FOR [Diem_Loyalty]
+GO
+ALTER TABLE [dbo].[NHAN_VIEN] ADD  DEFAULT ((0)) FOR [Luong_CB]
+GO
+ALTER TABLE [dbo].[SAN_PHAM] ADD  DEFAULT ((0)) FOR [So_Luong]
+GO
+ALTER TABLE [dbo].[CHI_NHANH]  WITH CHECK ADD  CONSTRAINT [CHK_GioMoCua] CHECK  (([Gio_MoCua]<[Gio_DongCua]))
+GO
+ALTER TABLE [dbo].[CHI_NHANH] CHECK CONSTRAINT [CHK_GioMoCua]
+GO
+ALTER TABLE [dbo].[KHACH_HANG]  WITH CHECK ADD  CONSTRAINT [CHK_CapDoHoiVien] CHECK  (([Cap_Do_Hoi_Vien]=N'VIP' OR [Cap_Do_Hoi_Vien]=N'Thân thiết' OR [Cap_Do_Hoi_Vien]=N'Cơ bản'))
+GO
+ALTER TABLE [dbo].[KHACH_HANG] CHECK CONSTRAINT [CHK_CapDoHoiVien]
+GO
+ALTER TABLE [dbo].[NHAN_VIEN]  WITH CHECK ADD  CONSTRAINT [CHK_Vai_Tro] CHECK  (([Vai_Tro]='Quản lý' OR [Vai_Tro]='Bán hàng' OR [Vai_Tro]='Tiếp tân' OR [Vai_Tro]='Bác si'))
+GO
+ALTER TABLE [dbo].[NHAN_VIEN] CHECK CONSTRAINT [CHK_Vai_Tro]
+GO
+ALTER TABLE [dbo].[SAN_PHAM]  WITH CHECK ADD  CONSTRAINT [CHK_LoaiSP] CHECK  (([Loai_SP]=N'Phụ kiện' OR [Loai_SP]=N'Thuốc' OR [Loai_SP]=N'Thức ăn'))
+GO
+ALTER TABLE [dbo].[HOA_DON]  WITH CHECK ADD  CONSTRAINT [CHK_Hinhthuc_tt] CHECK  (([Hinhthuc_tt]=N'Tiền mặt' OR [Hinhthuc_tt]=N'Chuyển khoản'))
+GO
+ALTER TABLE [dbo].[SAN_PHAM] CHECK CONSTRAINT [CHK_LoaiSP]
+GO
+ALTER TABLE [dbo].[SAN_PHAM]  WITH CHECK ADD  CONSTRAINT [CHK_TonKho] CHECK  (([So_Luong]>=(0)))
+GO
+ALTER TABLE [dbo].[SAN_PHAM] CHECK CONSTRAINT [CHK_TonKho]
+GO
+
+
+--khóa ngoại
