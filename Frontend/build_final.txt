@@ -1,0 +1,8 @@
+
+> petcarx-frontend@0.0.0 build
+> tsc -b && vite build
+
+src/components/ui/Modal.tsx(2,15): error TS6196: 'HTMLAttributes' is declared but never used.
+src/components/ui/StatsCard.tsx(2,10): error TS1484: 'LucideIcon' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/services/api.ts(1,33): error TS6196: 'User' is declared but never used.
+src/services/api.ts(136,28): error TS6133: 'doctorId' is declared but its value is never read.
