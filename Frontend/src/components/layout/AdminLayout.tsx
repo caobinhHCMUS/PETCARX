@@ -112,7 +112,7 @@ export default function AdminLayout() {
       `}</style>
 
       <aside className="admin-sidebar">
-        <h2 className="logo">PetCareX <small style={{fontSize:'10px', display:'block', color:'#94a3b8'}}>ADMIN PANEL</small></h2>
+        <h2 className="logo">PetCareX <small style={{ fontSize: '10px', display: 'block', color: '#94a3b8' }}>ADMIN PANEL</small></h2>
 
         <div className="user-info">
           <div className="name">{user?.username || "Quản trị viên"}</div>
@@ -125,14 +125,19 @@ export default function AdminLayout() {
 
           <div className="menu-label">Thống kê doanh thu</div>
           <NavLink to="/admin/revenue" className="menu-item">
-             Tất cả chi nhánh
+            Tất cả chi nhánh
           </NavLink>
           <NavLink to="/admin/revenue/branches" className="menu-item">
-             Chi nhánh & Bác sĩ
+            Chi nhánh & Bác sĩ
           </NavLink>
           <NavLink to="/admin/revenue/sales" className="menu-item">
-             Doanh thu bán hàng
+            Doanh thu bán hàng
           </NavLink>
+
+          <div className="menu-label">Danh mục</div>
+          <NavLink to="/admin/products" className="menu-item">Quản lý sản phẩm</NavLink>
+          <NavLink to="/admin/vaccines" className="menu-item">Quản lý vaccin</NavLink>
+          <NavLink to="/admin/packages" className="menu-item">Quản lý gói vaccin</NavLink>
 
           <div className="menu-label">Hệ thống</div>
           <NavLink to="/admin/branches" className="menu-item">Quản lý chi nhánh</NavLink>

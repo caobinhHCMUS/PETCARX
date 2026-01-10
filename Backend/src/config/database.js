@@ -25,6 +25,10 @@ export async function connectDB() {
         await pool.connect();
 
         console.log('✅ Connected to SQL Server database:', database);
+
+        const dbCheck = await pool.request().query('SELECT DB_NAME() AS current_db');
+        console.log('🔍 Actual Database in Session:', dbCheck.recordset[0].current_db);
+
         return pool;
     } catch (err) {
         console.error('❌ Database connection failed:');

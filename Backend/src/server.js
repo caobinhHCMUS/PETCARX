@@ -1,4 +1,4 @@
-import "./config/env.js"; 
+import "./config/env.js";
 
 import express from "express";
 import cors from "cors";
@@ -7,9 +7,12 @@ import { errorHandler, notFound } from "./middleware/errorHandler.js";
 
 import authRoutes from "./routes/authRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
-import cartRoutes from "./routes/cartRoutes.js"; 
+import cartRoutes from "./routes/cartRoutes.js";
 import doctorRoutes from "./routes/doctorRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import vaccineRoutes from "./routes/vaccineRoutes.js";
+import packageRoutes from "./routes/packageRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,7 +21,7 @@ const PORT = process.env.PORT || 5000;
 
 // ✅ CORS linh hoạt hơn cho môi trường Dev
 app.use(cors({
-  origin: ["http://localhost:5173", "http://127.0.0.1:5173"], 
+  origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
@@ -47,9 +50,12 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/customer", customerRoutes);
-app.use("/api/cart", cartRoutes); 
+app.use("/api/cart", cartRoutes);
 app.use("/api/doctor", doctorRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/vaccines", vaccineRoutes);
+app.use("/api/packages", packageRoutes);
 
 /* ================= ERROR HANDLER ================= */
 
@@ -70,4 +76,4 @@ async function startServer() {
   }
 }
 
-startServer();
+startServer(); 

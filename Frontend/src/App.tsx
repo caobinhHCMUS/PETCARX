@@ -24,9 +24,12 @@ import DoctorExamHistoryPage from "./pages/doctor/DoctorExamHistoryPage";
 // ADMIN
 import AdminLayout from "./components/layout/AdminLayout";
 import RevenuePage from './pages/admin/RevenuePage';
+import AdminProductsPage from './pages/admin/ProductsPage';
+import VaccinesPage from './pages/admin/VaccinesPage';
+import VaccinePackagesPage from './pages/admin/VaccinePackagesPage';
 
 // STAFF
-import StaffLayout from "./components/layout/StaffLayout"; 
+import StaffLayout from "./components/layout/StaffLayout";
 /* ================= ROLE NORMALIZE ================= */
 
 function normalizeRole(role: string) {
@@ -103,10 +106,10 @@ function AppRoutes() {
           <Route path="prescriptions" element={<DoctorPrescriptionPage />} />
           <Route path="exam-history" element={<DoctorExamHistoryPage />} />
         </Route>
-          
+
 
         {/* ADMIN - Đã đưa vào trong Routes */}
-         <Route
+        <Route
           path="/staff"
           element={
             <RequireRole allow={["nhanvien"]}>
@@ -135,6 +138,9 @@ function AppRoutes() {
           <Route path="revenue" element={<RevenuePage />} />
           <Route path="revenue/branches" element={<div>Thống kê doanh thu theo chi nhánh & bác sĩ</div>} />
           <Route path="revenue/sales" element={<div>Thống kê doanh thu bán hàng lẻ</div>} />
+          <Route path="products" element={<AdminProductsPage />} />
+          <Route path="vaccines" element={<VaccinesPage />} />
+          <Route path="packages" element={<VaccinePackagesPage />} />
           <Route path="branches" element={<div>Quản lý danh sách chi nhánh</div>} />
           <Route path="staff" element={<div>Quản lý danh sách bác sĩ/nhân viên</div>} />
         </Route>
