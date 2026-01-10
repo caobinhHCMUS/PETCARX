@@ -58,7 +58,7 @@ export default function DoctorLayout() {
           background: rgba(255, 255, 255, 0.15);
         }
 
-        /* NavLink của react-router-dom sẽ tự thêm class .active khi khớp URL */
+        /* NavLink của react-router-dom sẽ tự thêm class .active khi khơsp URL */
         .menu-item.active {
           background: rgba(255, 255, 255, 0.25);
           font-weight: bold;
@@ -110,7 +110,7 @@ export default function DoctorLayout() {
           </NavLink>
         </nav>
 
-        <button className="logout-btn" onClick={logout}>
+        <button className="logout-btn" onClick={logout}> 
           Đăng xuất
         </button>
       </aside>
