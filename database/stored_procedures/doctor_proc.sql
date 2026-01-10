@@ -130,10 +130,11 @@ GO
 --proc kê đơn thuốc
 -- Cập nhật CT_DON_THUOC để lưu giá sản phẩm và tính thành tiền
 CREATE OR ALTER PROCEDURE dbo.sp_BS_IssuePrescription
-    @ma_pet NVARCHAR(50),
-    @items dbo.TVP_PrescriptionItems READONLY, -- Tham số TVP chứa danh sách thuốc
-    @ma_hd NVARCHAR(50) OUTPUT,
-    @ma_dt NVARCHAR(50) OUTPUT
+    @ma_pet NVARCHAR(10),
+    @ma_bs NVARCHAR(10),
+    @items dbo.TVP_PrescriptionItems READONLY,
+    @ma_hd NVARCHAR(10) OUTPUT,
+    @ma_dt NVARCHAR(10) OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -141,59 +142,62 @@ BEGIN
     BEGIN TRY
         BEGIN TRAN;
 
-        -- 1) Validate đầu vào
-        IF @ma_pet IS NULL OR LTRIM(RTRIM(@ma_pet)) = ''
-            THROW 50001, N'Thiếu mã pet', 1;
+        -- 1) Validate dữ liệu đầu vào
+        IF @ma_pet IS NULL OR LTRIM(RTRIM(@ma_pet)) = '' THROW 50001, N'Thiếu mã pet', 1;
+        IF @ma_bs IS NULL OR LTRIM(RTRIM(@ma_bs)) = '' THROW 50001, N'Thiếu mã bác sĩ', 1;
+        IF NOT EXISTS (SELECT 1 FROM @items) THROW 50002, N'Danh sách thuốc rỗng', 1;
+        IF EXISTS (SELECT 1 FROM @items WHERE so_luong <= 0) THROW 50003, N'Số lượng không hợp lệ', 1;
 
-        IF NOT EXISTS (SELECT 1 FROM @items)
-            THROW 50002, N'Danh sách thuốc rỗng', 1;
-
-        IF EXISTS (SELECT 1 FROM @items WHERE so_luong <= 0)
-            THROW 50003, N'Số lượng không hợp lệ', 1;
-
-        -- 2) Kiểm tra số lượng tồn kho
+        -- 2) Kiểm tra tồn kho
         IF EXISTS (
-            SELECT 1
-            FROM @items i
+            SELECT 1 FROM @items i
             JOIN SAN_PHAM sp ON sp.Ma_SP = i.ma_sp
             WHERE sp.So_Luong < i.so_luong
-        )
-            THROW 50004, N'Số lượng sản phẩm không đủ trong kho', 1;
+        ) THROW 50004, N'Số lượng sản phẩm không đủ trong kho', 1;
 
-        -- 3) Tạo mã hóa đơn (Ma_HD) và mã đơn thuốc (Ma_DT) ngẫu nhiên
+        -- 3) Lấy Ma_KH từ bảng THU_CUNG (Để điền vào Hóa Đơn)
+        DECLARE @Ma_KH VARCHAR(10);
+        SELECT @Ma_KH = Ma_KH FROM THU_CUNG WHERE Ma_PET = @ma_pet;
+
+        IF @Ma_KH IS NULL 
+            THROW 50005, N'Thú cưng không thuộc về khách hàng nào hoặc không tồn tại', 1;
+
+        -- 4) Tạo mã HD và DT (Random nhưng đảm bảo độ dài varchar(10))
         SET @ma_hd = CONCAT('HD', LEFT(REPLACE(CONVERT(NVARCHAR(36), NEWID()), '-', ''), 8));
         SET @ma_dt = CONCAT('DT', LEFT(REPLACE(CONVERT(NVARCHAR(36), NEWID()), '-', ''), 8));
 
-        -- 4) Tính tổng tiền từ các sản phẩm trong TVP
+        -- 5) Tính tổng tiền (Quan trọng: Xử lý NULL để tránh lỗi insert)
         DECLARE @tong_tien DECIMAL(18,2);
-        SELECT @tong_tien = SUM(CAST(i.so_luong AS DECIMAL(18,2)) * sp.Gia)
+        
+        SELECT @tong_tien = ISNULL(SUM(CAST(i.so_luong AS DECIMAL(18,2)) * ISNULL(sp.Gia, 0)), 0)
         FROM @items i
         JOIN SAN_PHAM sp ON sp.Ma_SP = i.ma_sp;
 
-        -- 5) Insert vào bảng HOA_DON
-        INSERT INTO HOA_DON (Ma_HD, Ngay_Lap, Loai_Nghiep_Vu, Tong_Tien)
-        VALUES (@ma_hd, GETDATE(), N'đơn thuốc', @tong_tien);
+        -- 6) Insert HOA_DON (Vẫn insert Tong_Tien như yêu cầu)
+        -- Lưu ý: Loai_Nghiep_Vu phải khớp chính xác với CHECK constraint trong DB (N'Đơn thuốc')
+        INSERT INTO HOA_DON (Ma_HD, NV_Lap, Ma_KH, Ngay_Lap, Loai_Nghiep_Vu, Tong_Tien, Trang_Thai, HinhThuc_TT)
+        VALUES (@ma_hd, @ma_bs, @Ma_KH, GETDATE(), N'Đơn thuốc', @tong_tien, N'Hoàn thành', N'Tiền mặt');
 
-        -- 6) Insert vào bảng DON_THUOC
-        INSERT INTO DON_THUOC (Ma_DT, Ma_HD, Ma_Pet, Ngay_Ke)
-        VALUES (@ma_dt, @ma_hd, @ma_pet, GETDATE());
+        -- 7) Insert DON_THUOC
+        INSERT INTO DON_THUOC (Ma_DT, Ma_HD, Ma_Pet, Ma_BS, Ngay_Ke)
+        VALUES (@ma_dt, @ma_hd, @ma_pet, @ma_bs, GETDATE());
 
-        -- 7) Insert CHI TIẾT ĐƠN THUỐC (Lấy đầy đủ thông tin liều dùng, tần suất...)
-        -- Xử lý tập dữ liệu (Set-based) thay vì dùng CURSOR để đạt hiệu năng cao nhất
-        INSERT INTO CT_DON_THUOC (MA_DT, Ma_SP, So_Luong, Don_Gia, Lieu_Dung, Tan_Suat, So_Ngay, Cach_Dung)
+        -- 8) Insert CT_DON_THUOC
+        -- Lưu ý: KHÔNG insert cột Thanh_Tien vì trong DB nó là cột computed (AS So_Luong * Don_Gia)
+        INSERT INTO CT_DON_THUOC (Ma_DT, Ma_SP, So_Luong, Don_Gia, Lieu_Dung, Tan_Suat, So_Ngay, Cach_Dung)
         SELECT 
             @ma_dt, 
             i.ma_sp, 
             i.so_luong, 
-            sp.Gia,
-            i.lieu_dung, -- Đảm bảo cột này được map từ TVP
-            i.tan_suat,  -- Đảm bảo cột này được map từ TVP
-            i.so_ngay,   -- Đảm bảo cột này được map từ TVP
-            i.cach_dung  -- Đảm bảo cột này được map từ TVP
+            sp.Gia, -- Lấy giá hiện tại từ bảng sản phẩm để lưu vào lịch sử
+            i.lieu_dung,
+            i.tan_suat,
+            i.so_ngay,
+            i.cach_dung
         FROM @items i
         JOIN SAN_PHAM sp ON sp.Ma_SP = i.ma_sp;
 
-        -- 8) Cập nhật số lượng tồn kho trong bảng SAN_PHAM cho tất cả thuốc trong đơn
+        -- 9) Trừ tồn kho
         UPDATE sp
         SET sp.So_Luong = sp.So_Luong - i.so_luong
         FROM SAN_PHAM sp
@@ -201,7 +205,7 @@ BEGIN
 
         COMMIT;
 
-        -- Trả kết quả về cho Backend/Frontend
+        -- Trả về kết quả cho Backend
         SELECT 1 AS success, @ma_hd AS ma_hd, @ma_dt AS ma_dt, @tong_tien AS tong_tien;
 
     END TRY
