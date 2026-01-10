@@ -116,7 +116,16 @@ BEGIN
 END
 GO
 
-
+IF TYPE_ID(N'dbo.TVP_PrescriptionItems') IS NULL
+CREATE TYPE dbo.TVP_PrescriptionItems AS TABLE(
+    ma_sp NVARCHAR(50) NOT NULL,
+    so_luong INT NOT NULL,
+    lieu_dung NVARCHAR(255) NULL,
+    tan_suat NVARCHAR(255) NULL,
+    so_ngay INT NULL,
+    cach_dung NVARCHAR(255) NULL
+);
+GO
 
 --proc kê đơn thuốc
 -- Cập nhật CT_DON_THUOC để lưu giá sản phẩm và tính thành tiền
@@ -203,3 +212,124 @@ BEGIN
     END CATCH
 END
 GO
+
+
+CREATE OR ALTER PROC sp_BacSi_TaoDonThuoc
+    @Ma_BS varchar(10),
+    @Ma_PET varchar(10)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        BEGIN TRAN;
+
+        -- 1. Sinh mã hóa đơn cho đơn thuốc
+        DECLARE @Ma_HD varchar(10);
+        SELECT @Ma_HD =
+            'HD' + RIGHT(
+                '00000' + CAST(
+                    ISNULL(MAX(CAST(SUBSTRING(Ma_HD,3,5) AS int)),0) + 1
+                AS varchar(5)), 5)
+        FROM HOA_DON WITH (UPDLOCK, HOLDLOCK);
+
+        -- 2. Tạo hóa đơn (chưa có tiền)
+        INSERT INTO HOA_DON
+        (
+            Ma_HD, NV_Lap, Ma_KH,
+            Ngay_Lap, Tong_Tien,
+            Trang_Thai, Loai_Nghiep_Vu
+        )
+        VALUES
+        (
+            @Ma_HD, @Ma_BS, NULL,
+            GETDATE(), 0,
+            N'Đang xử lý', N'Đơn thuốc'
+        );
+
+        -- 3. Sinh mã đơn thuốc
+        DECLARE @Ma_DT varchar(10);
+        SELECT @Ma_DT =
+            'DT' + RIGHT(
+                '00000' + CAST(
+                    ISNULL(MAX(CAST(SUBSTRING(Ma_DT,3,5) AS int)),0) + 1
+                AS varchar(5)), 5)
+        FROM DON_THUOC WITH (UPDLOCK, HOLDLOCK);
+
+        -- 4. Tạo đơn thuốc (CHỈ BS + PET)
+        INSERT INTO DON_THUOC
+        (
+            Ma_DT, Ma_HD, Ma_PET, Ma_BS
+        )
+        VALUES
+        (
+            @Ma_DT, @Ma_HD, @Ma_PET, @Ma_BS
+        );
+
+        COMMIT;
+        SELECT 
+            'Success' AS Status,
+            @Ma_DT AS Ma_DonThuoc,
+            @Ma_HD AS Ma_HoaDon;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK;
+        SELECT 'Fail' AS Status, ERROR_MESSAGE() AS Message;
+    END CATCH
+END
+GO
+
+CREATE OR ALTER PROC sp_BacSi_ThemThuocVaoDon
+    @Ma_DT varchar(10),
+    @Ma_SP varchar(10),
+    @So_Luong int,
+    @Lieu_Dung nvarchar(100),
+    @Tan_Suat nvarchar(100),
+    @So_Ngay int,
+    @Cach_Dung nvarchar(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO CT_DON_THUOC
+    (
+        Ma_DT, Ma_SP, So_Luong,
+        Lieu_Dung, Tan_Suat,
+        So_Ngay, Cach_Dung, Don_Gia
+    )
+    SELECT
+        @Ma_DT, @Ma_SP, @So_Luong,
+        @Lieu_Dung, @Tan_Suat,
+        @So_Ngay, @Cach_Dung, Gia
+    FROM SAN_PHAM
+    WHERE Ma_SP = @Ma_SP
+      AND Loai_SP = N'Thuốc';
+
+    SELECT 'Success' AS Status;
+END
+GO
+
+CREATE OR ALTER PROC sp_CapNhatTongTien_DonThuoc
+    @Ma_DT varchar(10)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Tong_Tien decimal(18,2);
+
+    SELECT @Tong_Tien = ISNULL(SUM(Thanh_Tien),0)
+    FROM CT_DON_THUOC
+    WHERE Ma_DT = @Ma_DT;
+
+    UPDATE hd
+    SET Tong_Tien = @Tong_Tien
+    FROM HOA_DON hd
+    JOIN DON_THUOC dt ON dt.Ma_HD = hd.Ma_HD
+    WHERE dt.Ma_DT = @Ma_DT;
+
+    SELECT 'Success' AS Status, @Tong_Tien AS Tong_Tien;
+END
+GO
+
+
+

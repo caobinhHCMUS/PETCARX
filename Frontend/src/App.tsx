@@ -27,6 +27,7 @@ import RevenuePage from './pages/admin/RevenuePage';
 
 // STAFF
 import StaffLayout from "./components/layout/StaffLayout"; 
+import BookAppointmentPage from "./pages/customer/BookAppointmentPage";
 /* ================= ROLE NORMALIZE ================= */
 
 function normalizeRole(role: string) {
@@ -85,6 +86,8 @@ function AppRoutes() {
           <Route path="products" element={<ProductsPage />} />
           <Route path="cart" element={<CartPage />} />
           <Route path="orders" element={<OrdersPage />} />
+          <Route path="book-appointment" element={<BookAppointmentPage />} />
+
         </Route>
 
         {/* DOCTOR */}

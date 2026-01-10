@@ -19,3 +19,7 @@ INSERT INTO TAI_KHOAN (Ten_DangNhap, Mat_Khau, Vai_Tro, Ma_NV) VALUES
 ('nv006', '123456', N'Nhân viên', 'NV006'),
 ('nv007', '123456', N'Nhân viên', 'NV007'),
 ('nv008', '123456', N'Nhân viên', 'NV008');
+
+
+('NV007', N'Hoàng Gia Bảo', '1996-05-06', N'Nam', N'Tiếp tân', '2022-12-05', 8200000, NULL),
+('NV008', N'Lê Thanh Thảo', '2001-01-19', N'Nữ', N'Tiếp tân', '2024-06-18', 7600000, NULL);

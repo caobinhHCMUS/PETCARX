@@ -4,9 +4,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const server = process.env.DB_SERVER || '127.0.0.1';
-const database = process.env.DB_DATABASE || 'PetCareX';
+const database = process.env.DB_DATABASE || 'PetCareX1';
 const user = process.env.DB_USER || 'sa';
-const password = process.env.DB_PASSWORD || '123456789';
+const password = process.env.DB_PASSWORD || '123456';
 const port = process.env.DB_PORT || '1433';
 
 const connectionString = `Server=${server},${port};Database=${database};User Id=${user};Password=${password};Encrypt=false;TrustServerCertificate=true;`;

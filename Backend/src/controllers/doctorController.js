@@ -68,17 +68,26 @@ export async function createExam(req, res, next) {
   } catch (e) { next(e); }
 }
 
+
 export async function issuePrescription(req, res, next) {
   try {
-    const ma_bs = req.user?.ma_bs;
+    // 1. Lấy Ma_BS từ token (đã qua middleware auth)
+    const ma_bs = req.user?.ma_bs; 
+    
+    // Kiểm tra quyền bác sĩ
     if (!ma_bs) return res.status(403).json({ success: false, message: "Không phải bác sĩ" });
 
     const { ma_pet, items } = req.body;
-    if (!ma_pet || !items) return res.status(400).json({ success: false, message: "Thiếu dữ liệu" });
-    console.log("DEBUG ITEMS RECEIVED:", JSON.stringify(items, null, 2)); // Thêm dòng này
+    
+    // Validate dữ liệu đầu vào
+    if (!ma_pet || !items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: "Thiếu dữ liệu hoặc danh sách thuốc rỗng" });
+    }
+
     const pool = getPool();
     
-    // 1. Khởi tạo TVP khớp hoàn toàn với định nghĩa SQL của bạn
+    // 2. Tạo Table-Valued Parameter (TVP)
+    // Cấu trúc này PHẢI khớp với TYPE dbo.TVP_PrescriptionItems trong SQL
     const tvp = new sql.Table("dbo.TVP_PrescriptionItems"); 
     tvp.columns.add("ma_sp", sql.NVarChar(50), { nullable: false });
     tvp.columns.add("so_luong", sql.Int, { nullable: false });
@@ -87,32 +96,36 @@ export async function issuePrescription(req, res, next) {
     tvp.columns.add("so_ngay", sql.Int, { nullable: true });
     tvp.columns.add("cach_dung", sql.NVarChar(255), { nullable: true });
 
-    // 2. Thêm dữ liệu vào các dòng của TVP
+    // Fill dữ liệu
     for (const it of items) {
       tvp.rows.add(
         it.ma_sp,
         it.so_luong,
-        it.lieu_dung,
-        it.tan_suat,
-        it.so_ngay,
-        it.cach_dung
+        it.lieu_dung || null,
+        it.tan_suat || null,
+        it.so_ngay || null,
+        it.cach_dung || null
       );
     }
 
-    // 3. Thực thi Procedure
+    // 3. Gọi Stored Procedure
     const result = await pool.request()
-      .input("ma_pet", sql.NVarChar(50), ma_pet.trim())
-      .input("items", tvp) // Truyền biến tvp vào tham số @items của procedure
-      .output("ma_hd", sql.NVarChar(50))
-      .output("ma_dt", sql.NVarChar(50))
+      .input("ma_pet", sql.VarChar(10), ma_pet.trim())
+      .input("ma_bs", sql.VarChar(10), ma_bs) // <--- THÊM DÒNG NÀY: Truyền mã bác sĩ vào
+      .input("items", tvp)
+      .output("ma_hd", sql.VarChar(10)) // Chỉnh lại length khớp DB
+      .output("ma_dt", sql.VarChar(10)) // Chỉnh lại length khớp DB
       .execute("dbo.sp_BS_IssuePrescription");
 
     const row = result.recordset?.[0];
+    
     res.json({
       success: true,
       ma_hd: result.output.ma_hd || row?.ma_hd,
       ma_dt: result.output.ma_dt || row?.ma_dt,
+      tong_tien: row?.tong_tien
     });
+
   } catch (e) {
     next(e);
   }

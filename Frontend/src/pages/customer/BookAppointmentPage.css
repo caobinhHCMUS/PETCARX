@@ -1,0 +1,111 @@
+/* src/pages/customer/BookAppointmentPage.css */
+.booking-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.booking-title {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #34495e;
+}
+
+.form-select,
+.form-input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-select:focus,
+.form-input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.shift-options {
+  display: flex;
+  gap: 1rem;
+}
+
+.shift-label {
+  flex: 1;
+  border: 1px solid #bdc3c7;
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shift-label:hover {
+  background-color: #f0f2f5;
+}
+
+.shift-label.selected {
+  background-color: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.shift-radio {
+  display: none;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 1rem;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+  background-color: #219150;
+}
+
+.btn-submit:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.error-msg {
+  color: #e74c3c;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.success-msg {
+  color: #27ae60;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.doctor-info-small {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+}
