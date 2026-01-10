@@ -28,6 +28,7 @@ import RevenuePage from './pages/admin/RevenuePage';
 // STAFF
 import StaffLayout from "./components/layout/StaffLayout"; 
 import BookAppointmentPage from "./pages/customer/BookAppointmentPage";
+import StaffInvoicePage from "./pages/staff/StaffInvoicePage";
 /* ================= ROLE NORMALIZE ================= */
 
 function normalizeRole(role: string) {
@@ -120,7 +121,7 @@ function AppRoutes() {
           <Route index element={<div>Trang tổng quan nhân viên</div>} />
           <Route path="appointments" element={<div>Tạo lịch khám</div>} />
           <Route path="pets" element={<div>Tra cứu thú cưng</div>} />
-          <Route path="invoices" element={<div>Duyệt hóa đơn</div>} />
+          <Route path="invoices" element={<StaffInvoicePage />} />
         </Route>
 
 

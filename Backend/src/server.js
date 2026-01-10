@@ -10,7 +10,7 @@ import customerRoutes from "./routes/customerRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js"; 
 import doctorRoutes from "./routes/doctorRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-
+import staffRoutes from "./routes/staffRoutes.js";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -52,7 +52,7 @@ app.use("/api/doctor", doctorRoutes);
 app.use("/api/admin", adminRoutes);
 
 /* ================= ERROR HANDLER ================= */
-
+app.use('/api/staff', staffRoutes)
 app.use(notFound);
 app.use(errorHandler);
 

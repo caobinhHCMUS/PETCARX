@@ -1,0 +1,90 @@
+USE PetCareX2
+GO
+
+-- 1. TẠO DỮ LIỆU GIẢ (Nếu chưa có, để tránh lỗi khóa ngoại) --
+-- Tạo Chi nhánh
+IF NOT EXISTS (SELECT 1 FROM CHI_NHANH WHERE Ma_CN = 'CN01')
+    INSERT INTO CHI_NHANH (Ma_CN, Ten_CN, Gio_MoCua, Gio_DongCua) VALUES ('CN01', N'Chi Nhánh HCM', '08:00', '22:00');
+
+-- Tạo Nhân viên (1 Bác sĩ, 1 Tiếp tân)
+IF NOT EXISTS (SELECT 1 FROM NHAN_VIEN WHERE Ma_NV = 'BS01')
+BEGIN
+    INSERT INTO NHAN_VIEN (Ma_NV, Ho_Ten, Vai_Tro, Ma_CN, Luong_CB) 
+    VALUES ('BS01', N'Nguyễn Văn Bác Sĩ', N'Bác sĩ', 'CN01', 10000000);
+    
+    INSERT INTO CT_BAC_SI (Ma_NV, So_Nam_Kinh_Nghiem, Bang_Cap) 
+    VALUES ('BS01', 5, N'Tiến sĩ Thú Y');
+END
+
+IF NOT EXISTS (SELECT 1 FROM NHAN_VIEN WHERE Ma_NV = 'NV01')
+    INSERT INTO NHAN_VIEN (Ma_NV, Ho_Ten, Vai_Tro, Ma_CN, Luong_CB) 
+    VALUES ('NV01', N'Trần Tiếp Tân', N'Tiếp tân', 'CN01', 7000000);
+
+-- Tạo Khách hàng
+IF NOT EXISTS (SELECT 1 FROM KHACH_HANG WHERE Ma_KH = 'KH01')
+    INSERT INTO KHACH_HANG (Ma_KH, Ho_Ten, SDT, Cap_Do_Hoi_Vien) 
+    VALUES ('KH01', N'Lê Thị Khách Hàng', '0909123456', N'Cơ bản');
+
+-- Tạo Thú cưng
+IF NOT EXISTS (SELECT 1 FROM THU_CUNG WHERE Ma_PET = 'PET01')
+    INSERT INTO THU_CUNG (Ma_PET, Ma_KH, Ten_PET, Ten_Loai, Giong) 
+    VALUES ('PET01', 'KH01', N'Mimi', N'Mèo', N'Mèo Anh Lông Ngắn');
+
+
+-- ============================================================
+-- 2. TẠO HÓA ĐƠN KHÁM BỆNH (Phần bạn cần)
+-- ============================================================
+
+-- Bước A: Tạo Hóa Đơn (Header) - Lúc đầu Tổng tiền là 0
+INSERT INTO HOA_DON (
+    Ma_HD, 
+    NV_Lap,     -- Nhân viên tạo hóa đơn (Thường là tiếp tân)
+    Ma_KH,      -- Khách hàng
+    Ngay_Lap, 
+    Loai_Nghiep_Vu, -- Bắt buộc phải là 'Khám bệnh' theo Check Constraint
+    Tong_Tien, 
+    Trang_Thai, 
+    HinhThuc_TT
+)
+VALUES (
+    'HD_KHAM_01', 
+    'NV01', 
+    'KH01', 
+    GETDATE(), 
+    N'Khám bệnh', 
+    0, 
+    N'Đang xử lý', 
+    N'Tiền mặt'
+);
+
+-- Bước B: Thêm Chi tiết khám bệnh (Bác sĩ khám và ra giá tiền)
+-- Giả sử khám tổng quát giá 200.000
+INSERT INTO CT_KHAM_BENH (
+    Ma_HD, 
+    Ma_PET, 
+    Bac_Si, -- Bác sĩ phụ trách khám
+    Ngay_Kham, 
+    Trieu_Chung, 
+    Chuan_Doan, 
+    Ngay_Hen_Tai_Kham, 
+    Thanh_Tien
+)
+VALUES (
+    'HD_KHAM_01', 
+    'PET01', 
+    'BS01', 
+    GETDATE(), 
+    N'Bỏ ăn, nôn mửa', 
+    N'Rối loạn tiêu hóa nhẹ', 
+    DATEADD(day, 3, GETDATE()), -- Tái khám sau 3 ngày
+    200000
+);
+
+-- Bước C: Cập nhật lại Tổng tiền cho Hóa đơn (Rất quan trọng)
+UPDATE HOA_DON
+SET Tong_Tien = (SELECT SUM(Thanh_Tien) FROM CT_KHAM_BENH WHERE Ma_HD = 'HD_KHAM_01')
+WHERE Ma_HD = 'HD_KHAM_01';
+
+-- Kiểm tra kết quả
+SELECT * FROM HOA_DON WHERE Ma_HD = 'HD_KHAM_01';
+SELECT * FROM CT_KHAM_BENH WHERE Ma_HD = 'HD_KHAM_01';
