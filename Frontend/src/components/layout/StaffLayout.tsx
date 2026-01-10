@@ -96,8 +96,14 @@ export default function StaffLayout() {
           <NavLink to="/staff/appointments" className="menu-item">
             Tạo lịch khám
           </NavLink>
+          <NavLink to="/staff/customers" className="menu-item">
+            Quản lý khách hàng
+          </NavLink>  
           <NavLink to="/staff/pets" className="menu-item">
             Tra cứu thú cưng
+          </NavLink>
+          <NavLink to="/staff/products" className="menu-item">
+            Quản lý sản phẩm
           </NavLink>
           <NavLink to="/staff/invoices" className="menu-item">
             Duyệt hóa đơn

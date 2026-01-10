@@ -16,7 +16,7 @@ function perfectNormalize(str) {
     .trim();
 }
 
-const ALLOWED_ROLES = ["khachhang", "bacsi", "quanly", "qunly", "nhanvien"];
+const ALLOWED_ROLES = ["khachhang", "bacsi", "quanly", "qunly", "nhanvien", "admin"];
 
 export async function login(req, res) {
   const { username, password } = req.body || {};
@@ -42,9 +42,9 @@ export async function login(req, res) {
 
     // 2. ÉP KIỂU ĐỂ KHỚP VỚI FRONTEND (Quan trọng nhất)
     // Nếu là "qunly" (lỗi font) thì phải biến thành "quanly" để Frontend cho qua cổng
-    const finalRole = (cleanRole === "qunly" || cleanRole === "quanly") ? "quanly" : cleanRole;
+    const finalRole = (cleanRole === "qunly" || cleanRole === "quanly" || cleanRole === "admin") ? "quanly" : cleanRole;
 
-    if (!ALLOWED_ROLES.includes(cleanRole)) {
+    if (!ALLOWED_ROLES.includes(finalRole)) {
       return res.status(403).json({ message: `Vai trò không hỗ trợ: ${rawRoleFromDB}` });
     }
 

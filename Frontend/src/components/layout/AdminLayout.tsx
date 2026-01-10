@@ -127,16 +127,18 @@ export default function AdminLayout() {
           <NavLink to="/admin/revenue" className="menu-item">
              Tất cả chi nhánh
           </NavLink>
-          <NavLink to="/admin/revenue/branches" className="menu-item">
-             Chi nhánh & Bác sĩ
+          
+          <NavLink to="/admin/doctor-statistic" className="menu-item">
+             Bác sĩ
           </NavLink>
-          <NavLink to="/admin/revenue/sales" className="menu-item">
-             Doanh thu bán hàng
-          </NavLink>
+          <NavLink to="/admin/statistics" className="menu-item">Doanh thu</NavLink>
 
           <div className="menu-label">Hệ thống</div>
           <NavLink to="/admin/branches" className="menu-item">Quản lý chi nhánh</NavLink>
-          <NavLink to="/admin/staff" className="menu-item">Quản lý nhân sự</NavLink>
+          <NavLink to="/admin/staffs" className="menu-item">Quản lý nhân sự</NavLink>
+          <NavLink to="/admin/accounts" className="menu-item">Quản lý tài khoản</NavLink>
+          <NavLink to="/admin/products" className="menu-item">Quản lý sản phẩm</NavLink>
+          
         </nav>
 
         <button className="logout-btn" onClick={logout}>

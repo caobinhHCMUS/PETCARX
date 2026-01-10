@@ -15,6 +15,8 @@ const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
 
   // load từ localStorage khi refresh
   useEffect(() => {
@@ -24,7 +26,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
     }
+    setLoading(false);
   }, []);
+  
 
   const login = async (username: string, password: string) => {
     const data = await authService.login(username, password);
@@ -52,10 +56,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: !!token && !!user,
       login,
       logout,
+      loading,
     }),
-    [user, token]
+    [user, token, loading]
   );
 
+  if (loading) return null;
+  
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

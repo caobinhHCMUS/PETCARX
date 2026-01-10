@@ -7,6 +7,7 @@ import {
   cartCheckout,
 } from "../services/cart.service";
 import { CartItem } from "../types/cart";
+import { useAuth } from "../context/AuthContext";
 
 interface CartContextType {
   cart: CartItem[];
@@ -22,8 +23,15 @@ interface CartContextType {
 export const CartContext = createContext<CartContextType | null>(null);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // demo – sau này lấy từ AuthContext
-  const ma_kh = "KH01";
+  const { user } = useAuth();
+
+  const ma_kh = user?.ma_kh;
+  
+  useEffect(() => {
+    if (!ma_kh) return;
+    loadCart();
+  }, [ma_kh]);
+
 
   const [cart, setCart] = useState<CartItem[]>([]);
 

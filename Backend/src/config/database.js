@@ -23,7 +23,7 @@ export async function connectDB() {
         // Explicitly create a new pool to avoid shared state issues
         pool = new sql.ConnectionPool(connectionString);
         await pool.connect();
-
+        
         console.log('✅ Connected to SQL Server database:', database);
         return pool;
     } catch (err) {

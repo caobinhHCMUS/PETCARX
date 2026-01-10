@@ -40,8 +40,8 @@ export const addToCart = async (req, res) => {
  * GET /api/cart/:ma_kh
  */
 export const getCart = async (req, res) => {
-  const { ma_kh } = req.params;
-
+  const ma_kh = req.user?.ma_kh;
+  console.log("ma_kh in getCart:", ma_kh);
   try {
     const pool = getPool();
 

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { CartContext } from "../../context/CartContext";
 
 export default function CartPage() {
@@ -10,7 +10,6 @@ export default function CartPage() {
 
   const {
     cart,
-    reload,
     updateQty,
     removeItem,
     toggleSelect,
@@ -22,11 +21,7 @@ export default function CartPage() {
   const [payMethod, setPayMethod] = useState<string>("Tiền mặt"); // optional
   const [checkingOut, setCheckingOut] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  
 
   const onCheckout = async () => {
     setError("");
