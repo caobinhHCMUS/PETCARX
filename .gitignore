@@ -1,4 +1,71 @@
+# Dependencies
 node_modules/
-*.log
-.DS_Store
+package-lock.json
+
+# Environment variables
 .env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+*.local
+
+# Frontend specific
+Frontend/build/
+Frontend/dist/
+Frontend/.vite
+Frontend/coverage/
+Frontend/*.local
+Frontend/build_*.txt
+Frontend/lint_*.txt
+
+# Backend specific
+Backend/dist/
+Backend/coverage/
+Backend/*.local
+Backend/test-db*.js
+Backend/uploads/
+
+# Database
+*.sql.bak
+*.sql~
+database/temp/
+database/backups/
+
+# Testing
+coverage/
+.nyc_output/
+*.test.js.snap
+
+# Misc
+.cache/
+tmp/
+temp/
+*.tmp
