@@ -1,5 +1,0 @@
-CREATE DATABASE VetClinicDB;
-GO
-
-USE VetClinicDB;
-GO

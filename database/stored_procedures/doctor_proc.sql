@@ -1,7 +1,7 @@
 
 --các proc cho bác sĩ
 -- proc ttra cưu hồ sơn thú cưng
-CREATE OR ALTER PROC dbo.sp_BS_SearchPets
+CREATE OR ALTER PROC dbo.sp_SearchPets
   @Keyword nvarchar(100)
 AS
 BEGIN

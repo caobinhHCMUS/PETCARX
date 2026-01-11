@@ -110,10 +110,7 @@ export default function CustomerLayout() {
           <NavLink to="/customer/orders" className="menu-item">
             Lịch sử mua
           </NavLink>
-          <NavLink to="/customer/doctors" className="menu-item">
-            Lịch bác sĩ
-          </NavLink>
-          <NavLink to="/customer/book-appointment" className="menu-item">
+          <NavLink to="/customer/booking" className="menu-item">
             Đặt lịch khám
           </NavLink>
           <NavLink to="/customer/pets" className="menu-item">

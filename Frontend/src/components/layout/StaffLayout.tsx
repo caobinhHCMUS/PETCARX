@@ -99,7 +99,7 @@ export default function StaffLayout() {
           <NavLink to="/staff/pets" className="menu-item">
             Tra cứu thú cưng
           </NavLink>
-          <NavLink to="/staff/invoices" className="menu-item">
+          <NavLink to="/staff/orderapproval" className="menu-item">
             Duyệt hóa đơn
           </NavLink>
         </nav>

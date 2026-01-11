@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
-
+import { PetProvider } from "./context/PetContext";
 import LoginPage from "./pages/LoginPage";
 
 // CUSTOMER
@@ -12,7 +12,8 @@ import CustomerHome from "./pages/customer/CustomerHome";
 import ProductsPage from "./pages/customer/ProductsPage";
 import CartPage from "./pages/customer/CartPage";
 import OrdersPage from "./pages/customer/OrdersPage";
-
+import PetsPage from "./pages/customer/PetsPage";
+import Booking from "./pages/customer/CustomerBooking";
 // DOCTOR
 import DoctorLayout from "./components/layout/DoctorLayout";
 import DoctorMedicinePage from "./pages/doctor/DoctorMedicinePage";
@@ -27,6 +28,7 @@ import RevenuePage from './pages/admin/RevenuePage';
 
 // STAFF
 import StaffLayout from "./components/layout/StaffLayout"; 
+import StaffOrderApproval from "./pages/staff/StaffOrderApproval";
 /* ================= ROLE NORMALIZE ================= */
 
 function normalizeRole(role: string) {
@@ -76,7 +78,9 @@ function AppRoutes() {
           element={
             <RequireRole allow={["khachhang"]}>
               <CartProvider>
-                <CustomerLayout />
+                <PetProvider>
+                  <CustomerLayout />
+                </PetProvider>
               </CartProvider>
             </RequireRole>
           }
@@ -85,6 +89,8 @@ function AppRoutes() {
           <Route path="products" element={<ProductsPage />} />
           <Route path="cart" element={<CartPage />} />
           <Route path="orders" element={<OrdersPage />} />
+          <Route path="pets" element={<PetsPage />} />
+          <Route path="booking" element={<Booking />} />
         </Route>
 
         {/* DOCTOR */}
@@ -117,7 +123,7 @@ function AppRoutes() {
           <Route index element={<div>Trang tổng quan nhân viên</div>} />
           <Route path="appointments" element={<div>Tạo lịch khám</div>} />
           <Route path="pets" element={<div>Tra cứu thú cưng</div>} />
-          <Route path="invoices" element={<div>Duyệt hóa đơn</div>} />
+          <Route path="orderapproval" element={<StaffOrderApproval />} />
         </Route>
 
 
@@ -145,11 +151,17 @@ function AppRoutes() {
           element={
             roleKey === "bacsi" ? (
               <Navigate to="/doctor" replace />
-            ) : roleKey === "khachhang" ? (
+            ) : 
+            roleKey === "khachhang" ? (
               <Navigate to="/customer" replace />
-            ) : roleKey === "quanly" ? (
+            ) :
+            roleKey === "quanly" ? (
               <Navigate to="/admin" replace />
-            ) : (
+            ) : 
+            roleKey === "nhanvien" ? ( // THÊM DÒNG NÀY
+              <Navigate to="/staff" replace />
+            ) :
+            (
               <Navigate to="/login" replace />
             )
           }

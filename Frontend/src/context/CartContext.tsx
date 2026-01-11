@@ -7,6 +7,7 @@ import {
   cartCheckout,
 } from "../services/cart.service";
 import { CartItem } from "../types/cart";
+import { useAuth } from "../context/AuthContext";
 
 interface CartContextType {
   cart: CartItem[];
@@ -22,12 +23,18 @@ interface CartContextType {
 export const CartContext = createContext<CartContextType | null>(null);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // demo – sau này lấy từ AuthContext
-  const ma_kh = "KH01";
+  const { user } = useAuth();
+  const ma_kh = user?.ma_kh;
 
   const [cart, setCart] = useState<CartItem[]>([]);
 
   const loadCart = async () => {
+    // ✅ CHẶN khi chưa có user/ma_kh
+    if (!ma_kh) {
+      setCart([]);
+      return;
+    }
+
     try {
       const res = await cartGet(ma_kh);
       const items = res.data?.items ?? res.data ?? [];
@@ -35,7 +42,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCart(
         (items as any[]).map((it) => ({
           ...it,
-          // map bit/int/boolean về boolean
           Selected: !!(it.Selected ?? it.Is_Selected),
         }))
       );
@@ -45,12 +51,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // ✅ Khi ma_kh thay đổi (login/logout), tự load lại cart
   useEffect(() => {
     loadCart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ma_kh]);
 
   const updateQty = async (ma_sp: string, so_luong: number) => {
+    if (!ma_kh) throw new Error("Chưa đăng nhập");
+
     try {
       await cartUpdateQty(ma_kh, ma_sp, Math.max(1, so_luong));
       await loadCart();
@@ -61,6 +70,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const removeItem = async (ma_sp: string) => {
+    if (!ma_kh) throw new Error("Chưa đăng nhập");
+
     try {
       await cartRemove(ma_kh, ma_sp);
       await loadCart();
@@ -71,6 +82,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const toggleSelect = async (ma_sp: string, checked: boolean) => {
+    if (!ma_kh) throw new Error("Chưa đăng nhập");
+
     try {
       await cartToggleSelect(ma_kh, ma_sp, checked);
       await loadCart();
@@ -81,11 +94,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const checkoutSelected = async (hinhThuc_TT?: string) => {
+    if (!ma_kh) throw new Error("Chưa đăng nhập");
+
     try {
-      // nếu không truyền hinhThuc_TT => backend default COD/tiền mặt
       const res = await cartCheckout(ma_kh, hinhThuc_TT);
 
-      // hỗ trợ nhiều kiểu response (tùy backend bạn trả)
       if (res.data?.success === false) {
         throw new Error(res.data?.message || "Thanh toán thất bại");
       }
@@ -122,7 +135,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateQty,
         removeItem,
         toggleSelect,
-        checkoutSelected, // ✅ quan trọng: expose ra
+        checkoutSelected,
         subtotal,
         totalSelected,
       }}

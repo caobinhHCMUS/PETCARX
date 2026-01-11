@@ -231,6 +231,7 @@ BEGIN
   SELECT 'Success' AS Status;
 END
 GO
+
 --10 . Thanh toán giỏ hàng.
 CREATE OR ALTER PROC sp_GioHang_Checkout_Selected
   @Ma_KH varchar(10),
@@ -323,3 +324,189 @@ BEGIN
 END
 GO
 
+
+--proc xem lịch sử mua hàng của khách
+CREATE OR ALTER PROCEDURE dbo.sp_KH_GetOrderHistory
+    @Ma_KH varchar(10)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        Ma_HD,
+        NV_Lap,
+        Ma_KH,
+        Ngay_Lap,
+        HinhThuc_TT,
+        Khuyen_Mai,
+        Tong_Tien,
+        Trang_Thai,
+        Loai_Nghiep_Vu
+    FROM dbo.HOA_DON
+    WHERE Ma_KH = @Ma_KH
+    ORDER BY Ngay_Lap DESC;
+END
+GO
+
+
+-- lấy danh sách thú cưng theo mã kh
+CREATE OR ALTER PROCEDURE dbo.sp_KH_GetPets
+    @Ma_KH varchar(10)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        Ma_PET,
+        Ma_KH,
+        Ten_PET,
+        Ten_Loai,
+        Giong,
+        Gioi_Tinh,
+        Ngay_Sinh,
+        Tinh_Trang_Suc_Khoe,
+        Mau_Sac
+    FROM dbo.THU_CUNG
+    WHERE Ma_KH = @Ma_KH
+    ORDER BY Ma_PET DESC;
+END
+GO
+
+-- thêm thú cưng mới 
+CREATE OR ALTER PROCEDURE dbo.sp_KH_CreatePet
+  @Ma_KH varchar(10),
+  @Ten_PET nvarchar(50),
+  @Ten_Loai nvarchar(50) = NULL,
+  @Giong nvarchar(50) = NULL,
+  @Gioi_Tinh nvarchar(10) = NULL,
+  @Ngay_Sinh date = NULL,
+  @Tinh_Trang_Suc_Khoe nvarchar(255) = NULL,
+  @Mau_Sac nvarchar(50) = NULL
+AS
+BEGIN
+  SET NOCOUNT ON;
+
+  DECLARE @NextNum int;
+  DECLARE @NewID varchar(10);
+
+  BEGIN TRAN;
+
+  -- Khóa phạm vi đọc để tránh 2 request cùng lấy chung MAX
+  SELECT @NextNum =
+      ISNULL(MAX(CAST(SUBSTRING(Ma_PET, 3, 5) AS int)), 0) + 1
+  FROM dbo.THU_CUNG WITH (UPDLOCK, HOLDLOCK)
+  WHERE Ma_PET LIKE 'TC%';
+
+  -- TC + 5 số
+  SET @NewID = 'TC' + RIGHT('00000' + CAST(@NextNum AS varchar(5)), 5);
+
+  INSERT INTO dbo.THU_CUNG (
+    Ma_PET, Ma_KH, Ten_PET, Ten_Loai, Giong, Gioi_Tinh, Ngay_Sinh, Tinh_Trang_Suc_Khoe, Mau_Sac
+  )
+  VALUES (
+    @NewID, @Ma_KH, @Ten_PET, @Ten_Loai, @Giong, @Gioi_Tinh, @Ngay_Sinh,
+    ISNULL(@Tinh_Trang_Suc_Khoe, N'Tốt'),
+    @Mau_Sac
+  );
+
+  COMMIT TRAN;
+
+  SELECT * FROM dbo.THU_CUNG WHERE Ma_PET = @NewID;
+END
+GO
+
+
+
+--câp nhật thú cững
+CREATE OR ALTER PROCEDURE dbo.sp_KH_UpdatePet
+    @Ma_KH varchar(10),
+    @Ma_PET varchar(10),
+    @Ten_PET nvarchar(50) = NULL,
+    @Ten_Loai nvarchar(50) = NULL,
+    @Giong nvarchar(50) = NULL,
+    @Gioi_Tinh nvarchar(10) = NULL,
+    @Ngay_Sinh date = NULL,
+    @Tinh_Trang_Suc_Khoe nvarchar(255) = NULL,
+    @Mau_Sac nvarchar(50) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.THU_CUNG WHERE Ma_PET = @Ma_PET AND Ma_KH = @Ma_KH)
+    BEGIN
+        RAISERROR(N'Không tìm thấy thú cưng hoặc bạn không có quyền cập nhật.', 16, 1);
+        RETURN;
+    END
+
+    UPDATE dbo.THU_CUNG
+    SET
+        Ten_PET = COALESCE(@Ten_PET, Ten_PET),
+        Ten_Loai = COALESCE(@Ten_Loai, Ten_Loai),
+        Giong = COALESCE(@Giong, Giong),
+        Gioi_Tinh = COALESCE(@Gioi_Tinh, Gioi_Tinh),
+        Ngay_Sinh = COALESCE(@Ngay_Sinh, Ngay_Sinh),
+        Tinh_Trang_Suc_Khoe = COALESCE(@Tinh_Trang_Suc_Khoe, Tinh_Trang_Suc_Khoe),
+        Mau_Sac = COALESCE(@Mau_Sac, Mau_Sac)
+    WHERE Ma_PET = @Ma_PET AND Ma_KH = @Ma_KH;
+
+    SELECT * FROM dbo.THU_CUNG WHERE Ma_PET = @Ma_PET;
+END
+GO
+
+
+--xóa thú cưng
+CREATE OR ALTER PROCEDURE dbo.sp_KH_DeletePet
+    @Ma_KH varchar(10),
+    @Ma_PET varchar(10)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.THU_CUNG WHERE Ma_PET = @Ma_PET AND Ma_KH = @Ma_KH)
+    BEGIN
+        RAISERROR(N'Không tìm thấy thú cưng hoặc bạn không có quyền xóa.', 16, 1);
+        RETURN;
+    END
+
+    DELETE FROM dbo.THU_CUNG
+    WHERE Ma_PET = @Ma_PET AND Ma_KH = @Ma_KH;
+
+    SELECT 1 AS Deleted;
+END
+GO
+
+
+-- lấy danh sách bác sĩ được phân lịch làm việc theo ngày và ca
+CREATE PROCEDURE dbo.sp_KH_GetAvailableDoctors
+    @Ngay_Kham DATE,
+    @Ca_lamviec INT
+AS
+BEGIN
+    SELECT 
+        BS.Ma_BS, 
+        BS.Ho_Ten, 
+        BS.SDT, 
+        BS.So_Nam_Kinh_Nghiem,
+        BS.Bang_Cap
+    FROM dbo.Bac_Si BS
+    INNER JOIN dbo.LICH_KHAM LK ON BS.Ma_BS = LK.Ma_BS
+    WHERE CAST(LK.Ngay_Kham AS DATE) = @Ngay_Kham 
+      AND LK.Ca_lamviec = @Ca_lamviec
+END
+GO
+
+-- tạo và Lưu phiếu đặt lịch
+CREATE PROCEDURE dbo.sp_KH_CreateBooking
+    @Ma_KH VARCHAR(10),
+    @Ma_PET VARCHAR(10),
+    @Ma_BS VARCHAR(10),
+    @Ca_lamviec INT,
+    @Ngay_Dat DATE
+AS
+BEGIN
+    INSERT INTO dbo.PHIEU_DAT_LICH_KHAM (Ma_KH, Ma_PET, Ma_BS, Ca_lamviec, Ngay_Dat)
+    VALUES (@Ma_KH, @Ma_PET, @Ma_BS, @Ca_lamviec, @Ngay_Dat);
+    
+    SELECT SCOPE_IDENTITY() AS NewBookingID;
+END
+GO

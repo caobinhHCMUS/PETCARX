@@ -9,7 +9,7 @@ export async function searchPets(req, res, next) {
     const pool = getPool();
     const rs = await pool.request()
       .input("Keyword", sql.NVarChar(100), keyword)
-      .execute("dbo.sp_BS_SearchPets");
+      .execute("dbo.sp_SearchPets");
 
     res.json({ success: true, items: rs.recordset || [] });
   } catch (e) { next(e); }
